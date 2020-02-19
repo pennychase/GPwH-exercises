@@ -138,14 +138,16 @@ prng a b maxNumber seed = (a*seed + b) `mod` maxNumber
 
 -- genRandomInts generates a list of random Ints of size n with seed
 -- Use a known seed during testing, but use a random seed for production
--- For args to prng: pick a and b, use char maxbound as the maxNumber
+-- For args to prng: pick a and b, use Char maxBound as the maxNumber
 genRandomInts :: Int -> Int -> [Int]
 genRandomInts n seed = take n (iterate myPrng seed)
   where
     myPrng = prng 1337 7 (fromEnum (maxBound :: Char))
 
--- streamCipher uses genRandomInts to create a random one time pad and
--- uses OTP to encode/decode plain text with that pad
+-- streamCipher creates a one time pad by generating random Ints with
+-- genRandomInts using the length of the input text as the size argument
+-- and then maps those Ints to Chars.
+-- Then it uses applyOTP to encode/decode the plain text with that pad
 streamCipher :: Int -> String -> String
 streamCipher seed text = applyOTP pad text
   where
