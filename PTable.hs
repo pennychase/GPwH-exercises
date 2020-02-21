@@ -3,6 +3,8 @@ module PTable where
 import Data.Semigroup
 import Data.List
 import Data.List.Split
+-- if we're doing this using glocal stack (and no stack.yaml with split as a dependency)
+-- we need to have done: stack install split
 
 cartCombine :: (a -> b -> c) -> [a] -> [b] -> [c]
 cartCombine func l1 l2 = zipWith func newL1 cycledL2
@@ -83,6 +85,7 @@ instance Enum Die where
         | s == 5 = Five
         | s == 6 = Six
 
+
 -- Create Events for multiple Dice
 
 -- read the die side names from strings into the Die enumeration
@@ -94,7 +97,7 @@ sumDieSides :: PTable -> [(Int, Double)]
 sumDieSides (PTable (Events e) (Probs p)) = zip (map (sum . map fromEnum) strsToDice) p
     where strsToDice = map (\x -> readDieList (splitOn "-" x)) e
 
--- Given a PTable of the probs of tossing multiple diece, create a new PTable of the
+-- Given a PTable of the probs of tossing multiple dice, create a new PTable of the
 -- sums of the tosses (i.e., when the two dice sum to 2, 3, 4, etc)
 combineDice :: PTable -> PTable
 combineDice dice = PTable (Events (map show sumSides)) (Probs probs)
@@ -107,3 +110,6 @@ coin = createPTable (Events (map show [Head, Tail])) (Probs [0.5, 0.5])
 die = PTable (Events (map show [One, Two, Three, Four, Five, Six]))
              (Probs (take 6 . repeat $ 1.0/6))
 twoDice = die <> die
+
+-- now we can do "combineDice twoDice" to see the probabilities of the sums of
+-- dice faces
