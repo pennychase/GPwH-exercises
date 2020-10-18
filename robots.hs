@@ -4,8 +4,9 @@
 module Robots where
 
 -- robot constructor using a tuple to represent multiple attributes: name, attack strength, hit points
-robot :: (a, b, c) -> ((a,b,c) -> t) -> t
+robot :: (a, b, c) -> ((a, b, c) -> t) -> t
 robot (name, attack, hp) = \message -> message (name, attack, hp)
+
 
 -- accessor functions
 
@@ -26,7 +27,7 @@ getName aRobot = aRobot name
 getAttack :: (((a, b, c) -> b) -> t) -> t
 getAttack aRobot = aRobot attack
 
-getHP :: (Ord t, Num t) => (((a, b, c) -> c) -> t) -> t
+getHP :: (((a, b, c) -> c) -> t) -> t
 getHP aRobot = aRobot hp
 
 -- the setter functions
@@ -41,7 +42,7 @@ setHP aRobot newHP = aRobot (\(n, a, h) -> robot (n, a, newHP))
 
 printRobot aRobot =
     aRobot (\(n, a, h) ->   n ++
-                            " attack:" ++ (show a) ++
+                            " attack:" ++ (show a) ++ 
                             " hp:" ++ (show h))
 
 -- damage changes the HP value by the damage from an attack
@@ -58,8 +59,6 @@ fight aRobot defender = damage defender attack
 -- Get life of all the robots
 getLife rs = map getHP rs
 
-threeRoundFight r1 r2 =
-  (\r1 r2 -> fight r1 (\r1 r2 -> fight r1 (\r1 r2 -> fight r1 (\r1 r2 -> fight r1 r2)))) r1 r2
 
 -- Some Robots
 killerRobot = robot ("Kill3r", 25, 200)
@@ -86,7 +85,6 @@ slowRobotRound2 = fight fastRobotRound1 slowRobotRound1
 fastRobotRound3 = fight slowRobotRound2 fastRobotRound2
 slowRobotRound3 = fight fastRobotRound2 slowRobotRound2
 
-
 -- fastRobot and slowRobot Fght 2 - reflect speed of fastRobot (fastRobot attack first and slowRobot is updated before it attacks)
 -- Note that the actual order of execution doesn't matter
 slowRobotRound1' = fight fastRobot slowRobot
@@ -96,10 +94,3 @@ fastRobotRound2' = fight slowRobotRound2' fastRobotRound1'
 slowRobotRound3' = fight fastRobotRound2' slowRobotRound2'
 fastRobotRound3' = fight slowRobotRound3' fastRobotRound2'
 
--- Partial application to have a robot fight a buch of robots at the same time
-ninjaRobot = robot ("Ninja", 20, 250)
-ninjaFight = fight ninjaRobot
-results = map ninjaFight [slowRobot, fastRobot, gentleGiant, killerRobot]
--- Examine the results in ghci:
--- map printRobot results
--- getLife results

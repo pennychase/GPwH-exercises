@@ -42,7 +42,7 @@ data VinylRecord = VinylRecord {
     , recordTitle    :: String
     , recordYear     :: Int
     , recordPrice    :: Double
-}
+} 
 
 data CollectibleToy = CollectibleToy {
       name          :: String
@@ -71,7 +71,6 @@ price (PamphletItem _) = 0.0
 madeBy :: StoreItem -> String
 madeBy (BookItem book) = show (author book)
 madeBy (RecordItem record) = show (artist record)
-madeBy (PamphletItem pamphlet) = show (contact pamphlet)
 madeBy _ = "unknown"
 
 
@@ -86,18 +85,3 @@ b = Book { author = AuthorCreator (Author (Name "Jane" "Austen"))
 p = Pamphlet { title = "National Parks"
                 , pamphletDescription = "A listing of the national parks"
                 , contact = "National Parks Service"}
-
-r1 = VinylRecord { artist = ArtistCreator (Band "The Beatles")
-                  , recordTitle = "Yellow Submarine"
-                  , recordYear = 1969
-                  , recordPrice = 12.99
-                }
-
-r2 = VinylRecord { artist = ArtistCreator (Person (Name "Joni" "Mitchell") )
-                  , recordTitle = "Blue"
-                  , recordYear = 1971
-                  , recordPrice = 11.99
-                }
-
-
-store = [ BookItem b, PamphletItem p, RecordItem r1, RecordItem r2 ]

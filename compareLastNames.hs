@@ -8,7 +8,7 @@ compareLastNames :: (Ord a, Ord b) => (a, b) -> (a, b) -> Ordering
 compareLastNames name1 name2 =
     let
         lastNameCmp = compare (snd name1) (snd name2)
-    in
+    in 
         if lastNameCmp == EQ
         then compare (fst name1) (fst name2)
         else lastNameCmp
@@ -16,11 +16,3 @@ compareLastNames name1 name2 =
 -- Example of use
 -- names = [("Peter", "Hook"), ("Ian", "Curtis"), ("Stephen", "Morris"), ("Tim", "Hook"), ("Bernard", "Sumner")]
 -- sortBy compareLastNames names
-
-compareLastNames' :: (Ord a, Ord b) => (a, b) -> (a, b) -> Ordering
-compareLastNames name1 name2 =
-  if lastNameCmp == EQ
-    then compare (fst name1 fst name2)
-    else lastNameCmp
-  where
-    lastNameCmp = compare (snd name1) (snd name2)
