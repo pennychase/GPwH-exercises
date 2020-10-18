@@ -149,14 +149,14 @@ genRandomBits a b n seed = map intToBits (genRandomBits' a b n seed)
 -- streamCipher' is a helper function that encodes/decodes text into a list of bits
 streamCipher' :: String -> Int -> Int -> Int -> Int -> [Bits]
 streamCipher' plaintext a b n seed  = map (\pair -> (fst pair) `xor` (snd pair))
-                                        (zip streamBits plaintextBits)
+                                          (zip streamBits plaintextBits)
     where
         plaintextBits = map charToBits plaintext
         streamBits = genRandomBits a b n seed
 
--- streamCipher encodes/decodes text using streamCipger'
+-- streamCipher encodes/decodes text using streamCipher'
 streamCipher :: String -> Int -> Int -> Int -> Int -> String
-streamCipher plaintext a b seed = map bitsToChar (streamCipher' plaintext a b n seed)
+streamCipher plaintext a b n seed = map bitsToChar (streamCipher' plaintext a b n seed)
 
 
 -- Cipher class
