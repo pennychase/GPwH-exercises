@@ -1,28 +1,29 @@
-import System.Environment ( getArgs )
-import System.IO ( openFile, hGetContents, hClose, IOMode (..) )
+{-# LANGUAGE OverloadedStrings #-}
 
-getCounts :: String -> (Int, Int, Int)
+import System.Environment ( getArgs )
+import System.IO
+import Data.Text ( Text )
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+
+-- This version uses Text, which has strict IO, and now the file read/write works
+
+getCounts :: Text -> (Int, Int, Int)
 getCounts input = (charCount, wordCount, lineCount)
     where
-        charCount = length input
-        wordCount = (length . words) input
-        lineCount = (length . words) input
+        charCount = T.length input
+        wordCount = (length . T.words) input
+        lineCount = (length . T.lines) input
 
-countsText :: (Int, Int, Int) -> String
+countsText :: (Int, Int, Int) -> T.Text
 countsText (cc, wc, lc) =
-    mconcat ["chars: ", show cc, " words: ", show wc, " lines: ", show lc]
+    T.pack $ mconcat ["chars: ", show cc, " words: ", show wc, " lines: ", show lc]
 
--- using explicit handle. Move hClose after the hGetContents is used. In the book, it was after
--- the "let summary = ...", but that still failed. Maybe because summary wan't used, so the read
--- still wasn't forced? It works after the appendFile. But still doesn't work with stats.dat, since
--- closing file after trying to write to it.
 main :: IO ()
 main = do
     args <- getArgs
     let filename = head args
-    file <- openFile filename ReadMode
-    input <- hGetContents file
+    input <-TIO.readFile filename
     let summary = (countsText . getCounts) input
-    appendFile "stats.dat" (mconcat [filename, " ", summary, "\n"])
-    hClose file
-    putStrLn summary
+    TIO.appendFile "stats.dat" (mconcat [T.pack filename, " ", summary, "\n"])
+    TIO.putStrLn summary
