@@ -1,5 +1,5 @@
 import System.Environment ( getArgs )
-import System.IO ()
+import System.IO ( openFile, hGetContents, hClose, IOMode (..) )
 
 getCounts :: String -> (Int, Int, Int)
 getCounts input = (charCount, wordCount, lineCount)
@@ -12,12 +12,15 @@ countsText :: (Int, Int, Int) -> String
 countsText (cc, wc, lc) =
     mconcat ["chars: ", show cc, " words: ", show wc, " lines: ", show lc]
 
--- using ReadFile - handle is busy when trying to write to stats.dat
+-- using explicit handle. hClose closes the handle before input is used, so hGetContents 
+-- actually tries the read in the following expression
 main :: IO ()
 main = do
     args <- getArgs
     let filename = head args
-    input <- readFile filename
+    file <- openFile filename ReadMode
+    input <- hGetContents file
+    hClose file
     let summary = (countsText . getCounts) input
     appendFile "stats.dat" (mconcat [filename, " ", summary, "\n"])
     putStrLn summary
