@@ -2,8 +2,6 @@
 import System.Environment ( getArgs )
 import System.Exit ( ExitCode(ExitFailure), exitWith )
 import System.IO ()
-import Data.Text ( Text )
-import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 
 -- Exercise for Chapter 24
