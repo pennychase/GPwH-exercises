@@ -45,7 +45,7 @@ sortSection start size bytes = mconcat [before, changed, after]
     where
         (before, rest) = BC.splitAt start bytes
         (target, after) = BC.splitAt size rest
-        changed = BC.reverse (BC.sort target)
+        changed = BC.sort target
 
 -- Use random numbers to generate args for sortSection
 randomSortSection :: BC.ByteString -> IO BC.ByteString
@@ -55,13 +55,36 @@ randomSortSection bytes = do
     start <- randomRIO (0, bytesLength - sectionSize)
     return (sortSection start sectionSize bytes)
 
+--
+-- Reversing random bytes
+--
+
+-- Split a ByteString, take a chunk of the second half and reverse
+reverseSection :: Int -> Int -> BC.ByteString -> BC.ByteString
+reverseSection start size bytes = mconcat [before, changed, after]
+    where
+        (before, rest) = BC.splitAt start bytes
+        (target, after) = BC.splitAt size rest
+        changed = BC.reverse target
+
+-- Use random numbers to generate args for reverseSection
+randomReverseSection :: BC.ByteString -> IO BC.ByteString
+randomReverseSection bytes = do
+    let sectionSize = 50
+    let bytesLength = BC.length bytes
+    start <- randomRIO (0, bytesLength - sectionSize)
+    return (reverseSection start sectionSize bytes)
+
 glitchActions :: [BC.ByteString -> IO BC.ByteString]
 glitchActions = [ randomReplaceByte
                 , randomSortSection
+                , randomReverseSection
                 , randomReplaceByte
                 , randomSortSection
+                , randomReverseSection
                 , randomReplaceByte
                 , randomSortSection
+                , randomReverseSection
                 ]
 
 main :: IO ()
@@ -71,6 +94,7 @@ main = do
     imageFile <- BC.readFile fileName
     -- glitched <- randomReplaceByte imageFile
     -- glitched <- randomSortSection imageFile
+    -- glitched <- randomReverseSection imageFile
     glitched <- foldM (\bytes func -> func bytes) imageFile glitchActions
     let glitchedFileName = mconcat ["glitched_", fileName]
     BC.writeFile glitchedFileName glitched
