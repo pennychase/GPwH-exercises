@@ -1,5 +1,9 @@
 import qualified Data.Map as M
 
+-- Chapter 28 - Q28.3
+-- Use the RobotParts DB and create a CLI with which a user is asked
+-- to enter two part ids and return the cheaper
+
 data RobotPart = RobotPart
     { name :: String
     , description :: String
