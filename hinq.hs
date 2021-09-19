@@ -80,6 +80,12 @@ _hinq selectQuery joinQuery whereQuery =
         (whereQuery joinData)
     ) joinQuery
 
+_hinq' selectQuery joinQuery whereQuery =
+    let
+        joinData = joinQuery
+        whereData = whereQuery joinData
+    in  selectQuery whereData
+
 -- Some properties to use in testing
 startsWith :: Char -> String -> Bool
 startsWith c str = c == head str
