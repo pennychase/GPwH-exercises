@@ -1,60 +1,76 @@
 module Main where
 
+import Control.Monad
 import Data.Aeson
 import qualified Data.ByteString.Lazy as B
 import qualified Data.ByteString.Lazy.Char8 as BC
 import qualified Data.Text as T
 import GHC.Generics
 
--- Derive FromJSON and ToJSON instances
-data Book = Book
-            { title :: T.Text
-            , author :: T.Text
-            , year :: Int
-            } deriving (Show, Generic)
 
-instance FromJSON Book
-instance ToJSON Book
+-- Since the NOAA Result JSON object uses "id", we need to use another name in
+-- our type and create custom FromJSON and ToJSON instances
+data NOAAResult = NOAAResult
+                { uid :: T.Text
+                , mindate :: T.Text
+                , maxdate :: T.Text
+                , name :: T.Text
+                , datacoverage :: Float
+                , resultId :: T.Text
+                } deriving Show
 
--- can round trip: decode (encode book1) :: Maybe Book
-book1 :: Book
-book1 = Book { author = "Will Kurt"
-             , title = "Get Programming with Haskell"
-             , year = 2017
-             }
-
-jsonBook1 :: BC.ByteString
-jsonBook1 = 
-    "{\"author\":\"Emil Cioran\",\"title\":\"A Short History of Decay\",\"year\":1949}"
-
-
--- to decode: eitherDecode jsonBookErr :: Either String Book
--- Shows the error - missing author
-jsonBookErr :: BC.ByteString
-jsonBookErr = 
-    "{\"writer\":\"Emil Cioran\",\"title\":\"A Short History of Decay\",\"year\":1949}"
-
--- Create FromJSON and ToJSON instances
-sampleError :: BC.ByteString
-sampleError = "{\"message\":\"oops!\",\"error\":123}"
-
-data ErrorMessage = ErrorMessage
-                    { message :: T.Text
-                    , errorCode :: Int
-                    } deriving Show
-
-instance FromJSON ErrorMessage where
+instance FromJSON NOAAResult where
     parseJSON (Object v) =
-        ErrorMessage <$> v .: "message"
-                     <*> v .: "error"
+        NOAAResult  <$> v .: "uid"
+                    <*> v .: "mindate"
+                    <*> v .: "maxdate"
+                    <*> v .: "name"
+                    <*> v .: "datacoverage"
+                    <*> v .: "id"
 
-instance ToJSON ErrorMessage where
-    toJSON (ErrorMessage message errorCode) =
-        object [ "message" .= message
-               , "error" .= errorCode
+instance ToJSON NOAAResult where
+    toJSON (NOAAResult uid mindate maxdate name datacoverage resultId) =
+        object [ "uid"          .= uid
+               , "mindate"      .= mindate
+               , "maxdate"      .= maxdate
+               , "name"         .= name
+               , "datacoverage" .= datacoverage
+               , "id"           .= resultId
                ]
 
+data Resultset = Resultset
+                { offset :: Int
+                , count :: Int
+                , limit :: Int
+                } deriving (Show, Generic)
 
+instance FromJSON Resultset
+instance ToJSON Resultset
+
+data Metadata = Metadata
+                { resultset :: Resultset
+                } deriving (Show, Generic)
+
+instance FromJSON Metadata
+instance ToJSON Metadata
+
+data NOAAResponse = NOAAResponse
+                { metadata :: Metadata
+                , results :: [NOAAResult]
+                } deriving (Show, Generic)
+
+instance FromJSON NOAAResponse
+instance ToJSON NOAAResponse
+
+printResults :: Maybe [NOAAResult] -> IO ()
+printResults Nothing = print "error loading data"
+printResults (Just results) = do
+    forM_ results (print . nameDates)
+    where nameDates r = T.concat [" ", name r, "[", mindate r," to ", maxdate r,"]"]
 
 main :: IO ()
-main = print "hi"
+main = do
+    jsonData <- B.readFile "data.json"
+    let noaaResponse = decode jsonData :: Maybe NOAAResponse
+    let noaaResults = results <$> noaaResponse
+    printResults noaaResults
